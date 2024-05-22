@@ -1,22 +1,79 @@
-importar { Terminal } desde '@es-js/terminal'
+import { Terminal } from "@es-js/terminal"
+import { obtenerJson } from "https://desarrollo-aplicaciones.vercel.app/2024/code/obtener-json.js"
+import { validarSecreto } from "https://desarrollo-aplicaciones.vercel.app/2024/code/validar-secreto.js"
 
-asincrono funcion inicio() {
-	Terminal.limpiar()
+async function inicio() {
 
-	Terminal.escribir('Ingresa un valor:')
+  Terminal.log("Hola! Ingresa la palabra secreta:")
 
-	const resultado = esperar Terminal.leer()
+  const dni = "28926444" 
+  const palabraSecreta = 'clementi-444'
 
-	Terminal.escribir({
-		Resultado: resultado,
-		Tipo: tipoDe resultado,
-	})
+  var secreto = await Terminal.leer()  
 
-	Terminal.escribir('Presiona ENTER para volver a iniciar')
+  if (await validarSecreto(dni, secreto)) {
+    Terminal.log('La Palabra Secreta es correcta')
+    await mostrarCotizacion()
 
-	esperar Terminal.leerEnter()
+  } else {
 
-	esperar inicio()
+    Terminal.log("Palabra secreta inválida")
+  }
+
+  Terminal.log("Presiona ENTER para volver a ingresar")
+
+  await Terminal.leerEnter()
+
+  Terminal.clear()
+
+  inicio()
 }
 
+async function mostrarCotizacion() {
+  const dolarBlue = esperar obtenerJson('https://dolarapi.com/v1/dolares/blue')
+  mostrarInformacionMonedaTabla(dolarBlue)
+
+}
+function mostrarInformacionMonedaTabla(datosMoneda) {
+  const fechaActualizacionFormato = new Date(datosMoneda.fechaActualizacion).toLocaleString();
+  const promedio = (datosMoneda.compra + datosMoneda.venta) / 2;
+
+  const tablaHTML = `
+    <table>
+      <tr>
+        <th>Atributos</th>
+        <th>Valores</th>
+      </tr>
+      <tr>
+        <td>Moneda</td>
+        <td>${datosMoneda.moneda} </td>
+      </tr>
+      <tr>
+        <td>Nombre de la casa de cambio  </td>
+        <td>${datosMoneda.nombre}-ExChange</td>
+      </tr>
+      <tr>
+        <td>Precio de compra </td>
+        <td>USD ${datosMoneda.compra}</td>
+      </tr>
+      <tr>
+        <td>Precio de venta </td>
+        <td>USD ${datosMoneda.venta}</td>
+      </tr>
+      <tr>
+        <td>Fecha de actual</td>
+        <td>${fechaActualizacionFormato}</td>
+      </tr>
+      <tr>
+        <td>Promedio de compra y venta</td>
+        <td>USD ${promedio.toFixed(2)}</td>
+      </tr>
+    </table>
+  `;
+
+  Terminal.log(tablaHTML);
+}
 inicio()
+
+
+
